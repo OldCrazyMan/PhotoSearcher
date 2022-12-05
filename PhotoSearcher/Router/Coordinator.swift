@@ -15,7 +15,19 @@ class Coordinator {
     }
     
     func showDetailViewController(for item: Items) {
+
         let detailVC = DetailsViewController()
-        viewControoler?.present(detailVC, animated: true)
+        detailVC.setItems(item)
+        if let sheet = detailVC.sheetPresentationController {
+            sheet.detents = [.large()]
+            sheet.largestUndimmedDetentIdentifier = .large
+            sheet.prefersScrollingExpandsWhenScrolledToEdge = false
+            sheet.prefersEdgeAttachedInCompactHeight = true
+            sheet.widthFollowsPreferredContentSizeWhenEdgeAttached = true
+            sheet.prefersGrabberVisible = true
+            sheet.preferredCornerRadius = 30
+        }
+
+        viewControoler?.present(detailVC, animated: true, completion: nil)
     }
 }

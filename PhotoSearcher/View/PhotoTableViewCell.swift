@@ -14,8 +14,9 @@ final class PhotoTableViewCell: UITableViewCell {
         imageView.backgroundColor = .clear
         imageView.clipsToBounds = true
         imageView.alpha = 1
-        imageView.layer.borderWidth = 1.2
+        imageView.layer.borderWidth = 1.4
         imageView.layer.borderColor = UIColor.specialLabel.cgColor
+        imageView.applyShadow(cornerRadius: 3)
         imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
     }()

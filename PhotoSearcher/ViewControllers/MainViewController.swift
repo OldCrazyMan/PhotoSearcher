@@ -82,10 +82,11 @@ class MainViewController: UIViewController {
     //MARK: - SetupNavigationBar
     
     private func setupNavigationBar() {
-        let titleLabel = UILabel(text: "PhotoSearcher",
+        let titleLabel = UILabel(text: "PhotoSearcher 🌃",
                                  font: UIFont.boldSystemFont(ofSize: 22),
                                  color: .specialLabel,
                                  line: 0)
+        titleLabel.applyShadow(cornerRadius: 5)
         
         searchController.searchBar.placeholder = ""
         navigationItem.searchController = searchController
@@ -165,6 +166,7 @@ extension MainViewController: UITableViewDataSource {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: Constants.CellsNames.photoTableViewCell,
                                                        for: indexPath) as? PhotoTableViewCell else { return UITableViewCell() }
         cell.separatorInset.right = 16
+        cell.separatorInset.left = 16
         
         if let viewModel = viewModel {
             cell.cellConfigure(viewModel.sortedItems[indexPath.row])

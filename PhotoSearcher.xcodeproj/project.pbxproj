@@ -26,6 +26,7 @@
 		4C62DCE5293CF0520009048E /* UIImageView + Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C62DCE4293CF0520009048E /* UIImageView + Extension.swift */; };
 		4C62DCE7293CF3BE0009048E /* NetworkError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C62DCE6293CF3BE0009048E /* NetworkError.swift */; };
 		4C62DCEA293CF49F0009048E /* MainViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C62DCE9293CF49F0009048E /* MainViewModel.swift */; };
+		4C62DCEC293E5BF30009048E /* UIView+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C62DCEB293E5BF30009048E /* UIView+Extension.swift */; };
 		4CD16B80293CD06100DA79AB /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CD16B7F293CD06100DA79AB /* AppDelegate.swift */; };
 		4CD16B84293CD06100DA79AB /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CD16B83293CD06100DA79AB /* MainViewController.swift */; };
 		4CD16B89293CD06300DA79AB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4CD16B88293CD06300DA79AB /* Assets.xcassets */; };
@@ -52,6 +53,7 @@
 		4C62DCE4293CF0520009048E /* UIImageView + Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImageView + Extension.swift"; sourceTree = "<group>"; };
 		4C62DCE6293CF3BE0009048E /* NetworkError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkError.swift; sourceTree = "<group>"; };
 		4C62DCE9293CF49F0009048E /* MainViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewModel.swift; sourceTree = "<group>"; };
+		4C62DCEB293E5BF30009048E /* UIView+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+Extension.swift"; sourceTree = "<group>"; };
 		4CD16B7C293CD06100DA79AB /* PhotoSearcher.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PhotoSearcher.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4CD16B7F293CD06100DA79AB /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		4CD16B83293CD06100DA79AB /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
@@ -108,6 +110,7 @@
 				4C62DCE4293CF0520009048E /* UIImageView + Extension.swift */,
 				4C62DCC4293CDA540009048E /* UILabel + Extensions.swift */,
 				4C62DCCC293CE5EA0009048E /* UIStackView + Extensions.swift */,
+				4C62DCEB293E5BF30009048E /* UIView+Extension.swift */,
 			);
 			path = Extension;
 			sourceTree = "<group>";
@@ -198,7 +201,7 @@
 		4CD16B7E293CD06100DA79AB /* PhotoSearcher */ = {
 			isa = PBXGroup;
 			children = (
-				4C62DCE8293CF47B0009048E /* ViewModel */,
+				4C62DCB9293CD43F0009048E /* Application */,
 				4C62DCDB293CECA50009048E /* GlobalFunctions */,
 				4C62DCD4293CEC290009048E /* Models */,
 				4C62DCD1293CEBF20009048E /* Services */,
@@ -206,7 +209,7 @@
 				4C62DCCB293CE1540009048E /* Router */,
 				4C62DCC6293CDCF60009048E /* Utils */,
 				4C62DCC1293CD8F40009048E /* View */,
-				4C62DCB9293CD43F0009048E /* Application */,
+				4C62DCE8293CF47B0009048E /* ViewModel */,
 				4C62DCBA293CD4640009048E /* ViewControllers */,
 				4C62DCC0293CD83D0009048E /* Extension */,
 				4C62DCBB293CD4730009048E /* Resources */,
@@ -284,6 +287,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4C62DCEC293E5BF30009048E /* UIView+Extension.swift in Sources */,
 				4C62DCD3293CEC100009048E /* NetworkManager.swift in Sources */,
 				4CD16B84293CD06100DA79AB /* MainViewController.swift in Sources */,
 				4C62DCDA293CEC720009048E /* FlickrSearchModel.swift in Sources */,

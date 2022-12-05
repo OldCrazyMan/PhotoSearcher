@@ -16,7 +16,13 @@ final class DetailsViewController: UIViewController {
         return imageView
     }()
     
-  
+    private let titleLabel = UILabel(text: "",
+                                     font: UIFont.boldSystemFont(ofSize: 20),
+                                     color: .specialLabel,
+                                     line: 3)
+    
+    private var item: Items? = nil
+    private var imageCache = NSCache<AnyObject, AnyObject>()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -34,6 +40,18 @@ final class DetailsViewController: UIViewController {
         navigationController?.navigationBar.standardAppearance.titleTextAttributes = [.foregroundColor: UIColor.white]
         
         view.addSubview(photoImageView)
+        view.addSubview(titleLabel)
+        
+        guard let item = item,
+              let imageUrl = item.media?.m else { return }
+        
+        self.titleLabel.textAlignment = .center
+        self.titleLabel.text = item.title
+        self.photoImageView.downloadImageWith(imageCache: imageCache, urlString: imageUrl) {}
+    }
+    
+    func setItems(_ item: Items) {
+        self.item = item
     }
 }
 
@@ -44,10 +62,15 @@ extension DetailsViewController {
     private func setConstraints() {
         
         NSLayoutConstraint.activate([
+            titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            titleLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 20),
+            titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            titleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            
             photoImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             photoImageView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            photoImageView.heightAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.9),
-            photoImageView.widthAnchor.constraint(equalToConstant: view.frame.width),
+            photoImageView.heightAnchor.constraint(equalToConstant: view.frame.height / 2),
+            photoImageView.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.8),
         ])
     }
 }
