@@ -14,7 +14,7 @@ class Coordinator {
         self.viewControoler = viewControoler
     }
     
-    func showDetailViewController() {
+    func showDetailViewController(for item: Items) {
         let detailVC = DetailsViewController()
         viewControoler?.present(detailVC, animated: true)
     }

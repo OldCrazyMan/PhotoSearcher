@@ -9,20 +9,40 @@ import UIKit
 
 class MainViewController: UIViewController {
     
-    private let photoTableView: UITableView = {
-        let tableView = UITableView()
-        tableView.rowHeight = 150
-        tableView.backgroundColor = .specialCellBackground
-        tableView.separatorColor = .specialLabel
-        tableView.showsVerticalScrollIndicator = false
-        tableView.translatesAutoresizingMaskIntoConstraints = false
-        return tableView
+    private lazy var photoTableView: UITableView = {
+            let tableView = UITableView()
+            tableView.rowHeight = 173
+            tableView.backgroundColor = .specialCellBackground
+            tableView.separatorColor = .specialLabel
+            tableView.showsVerticalScrollIndicator = true
+            tableView.translatesAutoresizingMaskIntoConstraints = false
+            return tableView
     }()
+    
+    private let errorLabel = UILabel(text: "SomeError",
+                                     font: UIFont.boldSystemFont(ofSize: 20),
+                                     color: .red,
+                                     line: 1)
    
-    private let searchController = UISearchController()
+    private lazy var searchController = UISearchController()
+    
+    private var viewModel: MainViewModel?
     private var coordinator: Coordinator?
     
-    //MARK: - ViewDidLoad
+    private var tagsArray: [String] = []
+    private var counter: Int = 0
+    private var isPaging = true
+    
+    //MARK: - Override
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        errorLabel.isHidden = true
+        if viewModel == nil {
+            photoTableView.isHidden = true
+        }
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -38,9 +58,15 @@ class MainViewController: UIViewController {
     private func setupViews() {
         view.backgroundColor = #colorLiteral(red: 0.09410236031, green: 0.09412645549, blue: 0.09410081059, alpha: 1)
         view.addSubview(photoTableView)
+        view.addSubview(errorLabel)
         
+        
+        let networkManager = NetworkManager()
+        self.viewModel = MainViewModel(networkManager: networkManager)
         coordinator = Coordinator(viewControoler: self)
-        photoTableView.register(PhotoTableViewCell.self, forCellReuseIdentifier: Constants.CellsNames.photoTableViewCell)
+        
+        photoTableView.register(PhotoTableViewCell.self,
+                                forCellReuseIdentifier: Constants.CellsNames.photoTableViewCell)
     }
     
     //MARK: - SetDelegates
@@ -50,6 +76,7 @@ class MainViewController: UIViewController {
         photoTableView.dataSource = self
         
         searchController.searchBar.delegate = self
+        searchController.searchBar.searchTextField.delegate = self
     }
     
     //MARK: - SetupNavigationBar
@@ -60,7 +87,7 @@ class MainViewController: UIViewController {
                                  color: .specialLabel,
                                  line: 0)
         
-        searchController.searchBar.placeholder = "Search photo..."
+        searchController.searchBar.placeholder = ""
         navigationItem.searchController = searchController
         navigationItem.leftBarButtonItem = UIBarButtonItem.init(customView: titleLabel)
         navigationItem.searchController?.hidesNavigationBarDuringPresentation = false
@@ -71,39 +98,120 @@ class MainViewController: UIViewController {
         navigationController?.navigationBar.standardAppearance.backgroundColor = #colorLiteral(red: 0.1599434614, green: 0.165407896, blue: 0.1891466677, alpha: 1)
         navigationController?.navigationBar.scrollEdgeAppearance?.backgroundColor = #colorLiteral(red: 0.1599434614, green: 0.165407896, blue: 0.1891466677, alpha: 1)
     }
+    
+    private func removeAllAndReload() {
+        self.counter = 0
+        if let viewModel = viewModel {
+            viewModel.items.removeAll()
+            viewModel.sortedItems.removeAll()
+            DispatchQueue.main.async { [weak self] in
+                self?.searchController.searchBar.text = ""
+                self?.photoTableView.reloadData()
+                self?.errorLabel.isHidden = true
+                self?.view.endEditing(true)
+            }
+        }
+    }
+    
+    private func loadData() {
+        self.errorLabel.isHidden = true
+        if let viewModel = viewModel {
+            viewModel.loadImageWhenTextChanges(tagsArray[counter]) {
+                DispatchQueue.main.async { [weak self] in
+                    self?.photoTableView.isHidden = false
+                    self?.photoTableView.reloadData()
+                    self?.counter += 1
+                    self?.isPaging = true
+                }
+            } failureCompletion: { [weak self] error in
+                DispatchQueue.main.async {
+                    self?.errorLabel.isHidden = false
+                    self?.errorLabel.text = error.rawValue
+                }
+            }
+        }
+    }
 }
 
+extension MainViewController: UIScrollViewDelegate {
+    
+    public func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let position = scrollView.contentOffset.y
+        
+        if position > self.photoTableView.contentSize.height - 100 - scrollView.frame.size.height {
+            if isPaging {
+                isPaging = false
+                if counter == tagsArray.count {
+                    return
+                }
+                loadData()
+            }
+        }
+    }
+}
 //MARK: - UITableViewDelegates
 
 extension MainViewController: UITableViewDataSource {
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        10
+        if let viewModel = viewModel {
+            return viewModel.items.count
+        } else {
+            return 0
+        }
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: Constants.CellsNames.photoTableViewCell,
                                                        for: indexPath) as? PhotoTableViewCell else { return UITableViewCell() }
         cell.separatorInset.right = 16
+        
+        if let viewModel = viewModel {
+            cell.cellConfigure(viewModel.sortedItems[indexPath.row])
+        }
+        
     return cell
     }
 }
 
 extension MainViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        coordinator?.showDetailViewController()
+        if let viewModel = viewModel {
+            let item = viewModel.items[indexPath.row]
+            coordinator?.showDetailViewController(for: item)
+        }
         tableView.deselectRow(at: indexPath, animated: true)
     }
 }
 
 
 //MARK: - UISearchBarDelegate
+
+extension MainViewController: UITextFieldDelegate {
+    func textFieldShouldClear(_ textField: UITextField) -> Bool {
+        removeAllAndReload()
+        return true
+    }
+}
+
 extension MainViewController: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        print(searchText)
+        
+        if searchBar.isFirstResponder {
+            guard let text = searchBar.text else { return }
+            self.tagsArray = text.components(separatedBy: " ")
+            
+            if searchText.isEmpty {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    self.view.endEditing(true)
+                    return
+                }
+            }
+        }
     }
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-       
+        removeAllAndReload()
     }
     
     func searchBarShouldEndEditing(_ searchBar: UISearchBar) -> Bool {
@@ -111,14 +219,17 @@ extension MainViewController: UISearchBarDelegate {
     }
     
     func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
+        if !searchBar.text!.isEmpty {
+            return
+        }
+        removeAllAndReload()
     }
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         self.view.endEditing(true)
+        loadData()
     }
 }
-
-
 
 //MARK: - SetConstraints
 
@@ -130,7 +241,10 @@ extension MainViewController {
             photoTableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 0),
             photoTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 0),
             photoTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 0),
-            photoTableView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 0)
+            photoTableView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 0),
+       
+            errorLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor, constant: 0),
+            errorLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: 0)
         ])
     }
 }
