@@ -21,20 +21,20 @@ final class PhotoTableViewCell: UITableViewCell {
         return imageView
     }()
     
-    private let namePhotoLabel = UILabel(text: "namePhotoLabel",
+    private let namePhotoLabel = UILabel(text: "",
                                          font: UIFont.boldSystemFont(ofSize: 18),
-                                         color: .white,
+                                         color: .specialLabel,
                                          line: 2)
     
-    private let dataLabel = UILabel(text: "dataLabel",
+    private let dataLabel = UILabel(text: "",
                                     font: UIFont.systemFont(ofSize: 14),
                                     color: .specialLabel,
                                     line: 1)
     
-    private let tagsLabel = UILabel(text: "tagsLabel",
+    private let tagsLabel = UILabel(text: "",
                                     font: UIFont.systemFont(ofSize: 14),
                                     color: .specialLabel,
-                                    line: 2)
+                                    line: 3)
 
     private var labelsStackView = UIStackView()
     private var imageCache = NSCache<AnyObject, AnyObject>()
@@ -60,7 +60,7 @@ final class PhotoTableViewCell: UITableViewCell {
     //MARK: - SetupViews
     
     private func setupViews() {
-        backgroundColor = .specialCellBackground
+        backgroundColor = .clear
         selectionStyle = .none
         
         labelsStackView =  UIStackView(arrangedSubviews: [namePhotoLabel,
@@ -84,7 +84,7 @@ final class PhotoTableViewCell: UITableViewCell {
         else { return }
         
         self.namePhotoLabel.text = "Title: \(title)"
-        self.dataLabel.text = "Publication date: \(date.returnHumanReadableDate())"
+        self.dataLabel.text = "Date: \(date.returnHumanReadableDate())"
         self.tagsLabel.text = "Tags: \(tags)"
         self.photoImageView.downloadImageWith(imageCache: imageCache, urlString: imageUrl) {
             DispatchQueue.main.async { [weak self] in
@@ -101,8 +101,8 @@ final class PhotoTableViewCell: UITableViewCell {
         NSLayoutConstraint.activate([
             photoImageView.centerYAnchor.constraint(equalTo: centerYAnchor),
             photoImageView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
-            photoImageView.heightAnchor.constraint(equalToConstant: 120),
-            photoImageView.widthAnchor.constraint(equalToConstant: 120),
+            photoImageView.heightAnchor.constraint(equalToConstant: 140),
+            photoImageView.widthAnchor.constraint(equalToConstant: 140),
             
             labelsStackView.centerYAnchor.constraint(equalTo: centerYAnchor),
             labelsStackView.leadingAnchor.constraint(equalTo: photoImageView.trailingAnchor, constant: 16),

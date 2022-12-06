@@ -10,27 +10,37 @@ import UIKit
 class MainViewController: UIViewController {
     
     private lazy var photoTableView: UITableView = {
-            let tableView = UITableView()
-            tableView.rowHeight = 173
-            tableView.backgroundColor = .specialCellBackground
-            tableView.separatorColor = .specialLabel
-            tableView.showsVerticalScrollIndicator = true
-            tableView.translatesAutoresizingMaskIntoConstraints = false
-            return tableView
+        let tableView = UITableView()
+        tableView.rowHeight = 173
+        tableView.backgroundColor = .clear
+        tableView.separatorColor = .specialLabel
+        tableView.showsVerticalScrollIndicator = true
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        return tableView
+    }()
+    
+    private let backgroundImageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.image = UIImage(named: "NoImageBack")
+        imageView.clipsToBounds = true
+        imageView.alpha = 0.1
+        imageView.applyShadow(cornerRadius: 3)
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        return imageView
     }()
     
     private lazy var sortBarButtonItem: UIBarButtonItem = {
         return UIBarButtonItem(image: UIImage(systemName: "line.3.horizontal.decrease.circle"),
-                                style: .plain,
-                                target: self,
-                                action: #selector(sortBarButtonTapped))
+                               style: .plain,
+                               target: self,
+                               action: #selector(sortBarButtonTapped))
     }()
     
     private let errorLabel = UILabel(text: "SomeError",
                                      font: UIFont.boldSystemFont(ofSize: 20),
                                      color: .red,
                                      line: 1)
-   
+    
     private lazy var searchController = UISearchController()
     
     private var viewModel: MainViewModel?
@@ -50,10 +60,10 @@ class MainViewController: UIViewController {
             photoTableView.isHidden = true
         }
     }
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-       
+        
         setupViews()
         setDelegates()
         setupNavigationBar()
@@ -66,7 +76,7 @@ class MainViewController: UIViewController {
         view.backgroundColor = #colorLiteral(red: 0.09410236031, green: 0.09412645549, blue: 0.09410081059, alpha: 1)
         view.addSubview(photoTableView)
         view.addSubview(errorLabel)
-        
+        view.addSubview(backgroundImageView)
         
         let networkManager = NetworkManager()
         self.viewModel = MainViewModel(networkManager: networkManager)
@@ -104,7 +114,7 @@ class MainViewController: UIViewController {
         navigationItem.leftBarButtonItem = UIBarButtonItem.init(customView: titleLabel)
         navigationItem.backButtonTitle = ""
         navigationItem.hidesSearchBarWhenScrolling = false
-
+        
         navigationController?.navigationBar.tintColor = .white
         navigationController?.navigationBar.standardAppearance.backgroundColor = #colorLiteral(red: 0.1599434614, green: 0.165407896, blue: 0.1891466677, alpha: 1)
         navigationController?.navigationBar.scrollEdgeAppearance?.backgroundColor = #colorLiteral(red: 0.1599434614, green: 0.165407896, blue: 0.1891466677, alpha: 1)
@@ -116,24 +126,29 @@ class MainViewController: UIViewController {
             viewModel.items.removeAll()
             viewModel.sortedItems.removeAll()
             DispatchQueue.main.async { [weak self] in
-                self?.searchController.searchBar.text = ""
-                self?.photoTableView.reloadData()
-                self?.errorLabel.isHidden = true
-                self?.view.endEditing(true)
+                guard let self = self else { return }
+                self.searchController.searchBar.text = ""
+                self.photoTableView.reloadData()
+                self.errorLabel.isHidden = true
+                self.backgroundImageView.isHidden = false
+                self.view.endEditing(true)
             }
         }
     }
     
     private func loadData() {
+        let _ = ActivityIndicator.shared.customActivityIndicatory(self.view, startAnimate: true)
         self.errorLabel.isHidden = true
+        self.backgroundImageView.isHidden = true
         if let viewModel = viewModel {
             viewModel.loadImageWhenTextChanges(tagsArray[counter]) {
                 DispatchQueue.main.async { [weak self] in
+                    guard let self = self else { return }
+                    let _ = ActivityIndicator.shared.customActivityIndicatory(self.view, startAnimate: false)
                     
-                    self?.photoTableView.isHidden = false
-                    self?.photoTableView.reloadData()
-                    self?.counter += 1
-                    self?.isPaging = true
+                    self.photoTableView.reloadData()
+                    self.counter += 1
+                    self.isPaging = true
                 }
             } failureCompletion: { [weak self] error in
                 DispatchQueue.main.async {
@@ -221,7 +236,7 @@ extension MainViewController: UITableViewDataSource {
             cell.cellConfigure(viewModel.sortedItems[indexPath.row])
         }
         
-    return cell
+        return cell
     }
 }
 
@@ -247,7 +262,7 @@ extension MainViewController: UITextFieldDelegate {
 
 extension MainViewController: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-       
+        
         if searchBar.isFirstResponder {
             guard let text = searchBar.text else { return }
             self.tagsArray = text.components(separatedBy: " ")
@@ -289,13 +304,16 @@ extension MainViewController: UISearchBarDelegate {
 extension MainViewController {
     
     private func setConstraints() {
-
+        
         NSLayoutConstraint.activate([
             photoTableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 0),
             photoTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 0),
             photoTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 0),
             photoTableView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 0),
-       
+            
+            backgroundImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor, constant: 0),
+            backgroundImageView.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: 0),
+            
             errorLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor, constant: 0),
             errorLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: 0)
         ])
