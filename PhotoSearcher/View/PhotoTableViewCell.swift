@@ -43,7 +43,7 @@ final class PhotoTableViewCell: UITableViewCell {
     //MARK: - Override
     
     override func prepareForReuse() {
-     //   photoImageView.image = UIImage(named: "NoImage")
+        photoImageView.image = UIImage(named: "NoImage")
     }
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -75,7 +75,6 @@ final class PhotoTableViewCell: UITableViewCell {
     //MARK: - ConfigureCell
     
     func cellConfigure(_ item: Items) {
-        photoImageView.isHidden = true
         
         guard
             let title = item.title,

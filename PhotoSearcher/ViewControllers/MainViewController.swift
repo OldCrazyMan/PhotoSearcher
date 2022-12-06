@@ -19,6 +19,13 @@ class MainViewController: UIViewController {
             return tableView
     }()
     
+    private lazy var sortBarButtonItem: UIBarButtonItem = {
+        return UIBarButtonItem(image: UIImage(systemName: "line.3.horizontal.decrease.circle"),
+                                style: .plain,
+                                target: self,
+                                action: #selector(sortBarButtonTapped))
+    }()
+    
     private let errorLabel = UILabel(text: "SomeError",
                                      font: UIFont.boldSystemFont(ofSize: 20),
                                      color: .red,
@@ -46,7 +53,7 @@ class MainViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+       
         setupViews()
         setDelegates()
         setupNavigationBar()
@@ -82,16 +89,19 @@ class MainViewController: UIViewController {
     //MARK: - SetupNavigationBar
     
     private func setupNavigationBar() {
-        let titleLabel = UILabel(text: "PhotoSearcher 🌃",
+        let titleLabel = UILabel(text: "🌃 PhotoSearcher",
                                  font: UIFont.boldSystemFont(ofSize: 22),
                                  color: .specialLabel,
                                  line: 0)
         titleLabel.applyShadow(cornerRadius: 5)
         
         searchController.searchBar.placeholder = ""
+        searchController.hidesNavigationBarDuringPresentation = false
+        searchController.obscuresBackgroundDuringPresentation = false
         navigationItem.searchController = searchController
+        navigationItem.rightBarButtonItem = sortBarButtonItem
+        navigationItem.rightBarButtonItem?.isEnabled = false
         navigationItem.leftBarButtonItem = UIBarButtonItem.init(customView: titleLabel)
-        navigationItem.searchController?.hidesNavigationBarDuringPresentation = false
         navigationItem.backButtonTitle = ""
         navigationItem.hidesSearchBarWhenScrolling = false
 
@@ -119,6 +129,7 @@ class MainViewController: UIViewController {
         if let viewModel = viewModel {
             viewModel.loadImageWhenTextChanges(tagsArray[counter]) {
                 DispatchQueue.main.async { [weak self] in
+                    
                     self?.photoTableView.isHidden = false
                     self?.photoTableView.reloadData()
                     self?.counter += 1
@@ -131,6 +142,44 @@ class MainViewController: UIViewController {
                 }
             }
         }
+    }
+    
+    private func createSortMethod(_ completion: @escaping (Items, Items) -> Bool) -> UIAction {
+        return UIAction() { [weak self] action in
+            if let viewModel = self?.viewModel {
+                viewModel.sortedItems = viewModel.sortedItems.sorted(by: {
+                    completion($0, $1)
+                })
+                DispatchQueue.main.async {
+                    self?.photoTableView.reloadData()
+                }
+            }
+        }
+    }
+    
+    @objc private func sortBarButtonTapped(sender: UIBarButtonItem) {
+        
+        let alertController = UIAlertController(title: "", message: "Choose the sorting method:", preferredStyle: .actionSheet)
+        let sortName = UIAlertAction(title: "Name", style: .default) { (action) in
+            _ = self.createSortMethod({ lhs, rhs in
+                lhs.title! < rhs.title!
+            })
+            self.photoTableView.reloadData()
+        }
+        
+        let sortDate = UIAlertAction(title: "Date", style: .default) { (action) in
+            _ = self.createSortMethod({ lhs, rhs in
+                lhs.published! < rhs.published!
+            })
+            self.photoTableView.reloadData()
+        }
+        
+        let cancel = UIAlertAction(title: "Cancel", style: .cancel) { (action) in
+        }
+        alertController.addAction(sortName)
+        alertController.addAction(sortDate)
+        alertController.addAction(cancel)
+        present(alertController, animated: true)
     }
 }
 
@@ -198,14 +247,16 @@ extension MainViewController: UITextFieldDelegate {
 
 extension MainViewController: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        
+       
         if searchBar.isFirstResponder {
             guard let text = searchBar.text else { return }
             self.tagsArray = text.components(separatedBy: " ")
+            navigationItem.rightBarButtonItem?.isEnabled = (searchText.count > 0 ? true : false)
             
             if searchText.isEmpty {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                     self.view.endEditing(true)
+                    self.removeAllAndReload()
                     return
                 }
             }
