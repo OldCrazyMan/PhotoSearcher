@@ -19,11 +19,12 @@ class MainViewModel {
     
     func loadImageWhenTextChanges(_ searchText: String, completion: @escaping () -> Void, failureCompletion: @escaping (NetworkError) -> Void) {
         DispatchQueue.global(qos: .utility).async { [weak self] in
-            self?.networkManager.makeRequest(tag: searchText) { result in
+            guard let self = self else { return }
+            self.networkManager.makeRequest(tag: searchText) { result in
                 switch result {
                 case .success(let items):
-                    self?.items += items
-                    self?.sortedItems += items
+                    self.items += items
+                    self.sortedItems += items
                     completion()
                 case .failure(let error):
                     failureCompletion(error)
