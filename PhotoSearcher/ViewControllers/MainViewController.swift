@@ -152,8 +152,9 @@ class MainViewController: UIViewController {
                 }
             } failureCompletion: { [weak self] error in
                 DispatchQueue.main.async {
-                    self?.errorLabel.isHidden = false
-                    self?.errorLabel.text = error.rawValue
+                    guard let self = self else { return }
+                    self.errorLabel.isHidden = false
+                    self.errorLabel.text = error.rawValue
                 }
             }
         }
@@ -161,12 +162,13 @@ class MainViewController: UIViewController {
     
     private func createSortMethod(_ completion: @escaping (Items, Items) -> Bool) -> UIAction {
         return UIAction() { [weak self] action in
-            if let viewModel = self?.viewModel {
+            guard let self = self else { return }
+            if let viewModel = self.viewModel {
                 viewModel.sortedItems = viewModel.sortedItems.sorted(by: {
                     completion($0, $1)
                 })
                 DispatchQueue.main.async {
-                    self?.photoTableView.reloadData()
+                    self.photoTableView.reloadData()
                 }
             }
         }

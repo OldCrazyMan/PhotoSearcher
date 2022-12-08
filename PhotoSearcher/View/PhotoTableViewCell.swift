@@ -88,7 +88,8 @@ final class PhotoTableViewCell: UITableViewCell {
         self.tagsLabel.text = "Tags: \(tags)"
         self.photoImageView.downloadImageWith(imageCache: imageCache, urlString: imageUrl) {
             DispatchQueue.main.async { [weak self] in
-                self?.photoImageView.isHidden = false
+                guard let self = self else { return }
+                self.photoImageView.isHidden = false
             }
         }
     }
